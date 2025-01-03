@@ -8,6 +8,13 @@ package com.mycompany.rest.api.resources;
 import entities.City;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Resource;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSContext;
+import javax.jms.JMSProducer;
+import javax.jms.ObjectMessage;
+import javax.jms.Queue;
+import javax.jms.TextMessage;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -23,10 +30,19 @@ import javax.ws.rs.core.Response;
 @Path("/cities")
 public class CitiesResource {
     
+    @Resource(lookup="jms/__defaultConnectionFactory")
+    private static ConnectionFactory connFactory;
+    
+    @Resource(lookup="subsystemOneQueue")
+    private static Queue queue;
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCities(){
+        JMSContext context = connFactory.createContext();
+        JMSProducer producer = context.createProducer();
+        
+      
         return Response.status(Response.Status.CREATED).build();
     }
     
