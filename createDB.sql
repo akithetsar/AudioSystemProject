@@ -67,16 +67,16 @@ CREATE TABLE Listening (
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     FOREIGN KEY (audio_id) REFERENCES AudioTrack(audio_id)
 );
-
 CREATE TABLE Rating (
     rating_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT,
     audio_id INT,
-    rating INT CHECK (rating BETWEEN 1 AND 5),
+    rating ENUM('1', '2', '3', '4', '5'),
     rating_time DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES User(user_id),
     FOREIGN KEY (audio_id) REFERENCES AudioTrack(audio_id)
 );
+
 
 CREATE TABLE Favorites (
     favorite_id INT PRIMARY KEY AUTO_INCREMENT,
