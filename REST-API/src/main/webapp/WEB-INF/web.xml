@@ -3,9 +3,26 @@
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
    version="4.0">
+   
+    <!-- Session Configuration -->
     <session-config>
-        <session-timeout>
-            30
-        </session-timeout>
+        <session-timeout>30</session-timeout>
     </session-config>
+    
+    <!-- Resource Injection Configuration for JMS -->
+    <resource-ref>
+        <description>JMS Connection Factory</description>
+        <res-ref-name>jms/__defaultConnectionFactory</res-ref-name>
+        <res-type>javax.jms.ConnectionFactory</res-type>
+        <res-auth>Container</res-auth>
+        <lookup-name>jms/__defaultConnectionFactory</lookup-name> <!-- Correct element here -->
+    </resource-ref>
+    
+    <resource-ref>
+        <description>JMS Queue</description>
+        <res-ref-name>subsystemOneQueue</res-ref-name>
+        <res-type>javax.jms.Queue</res-type>
+        <res-auth>Container</res-auth>
+        <lookup-name>subsystemOneQueue</lookup-name> <!-- Correct element here -->
+    </resource-ref>
 </web-app>
