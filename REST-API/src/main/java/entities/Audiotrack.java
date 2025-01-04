@@ -44,12 +44,6 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Audiotrack.findByUploadTime", query = "SELECT a FROM Audiotrack a WHERE a.uploadTime = :uploadTime")})
 public class Audiotrack implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "audio_id")
-    private Integer audioId;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
@@ -64,6 +58,13 @@ public class Audiotrack implements Serializable {
     @Column(name = "upload_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date uploadTime;
+
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "audio_id")
+    private Integer audioId;
     @JoinTable(name = "audiocategory", joinColumns = {
         @JoinColumn(name = "audio_id", referencedColumnName = "audio_id")}, inverseJoinColumns = {
         @JoinColumn(name = "category_id", referencedColumnName = "category_id")})
@@ -101,21 +102,6 @@ public class Audiotrack implements Serializable {
         this.audioId = audioId;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
 
     public Date getUploadTime() {
         return uploadTime;
@@ -193,5 +179,23 @@ public class Audiotrack implements Serializable {
     public String toString() {
         return "entities.Audiotrack[ audioId=" + audioId + " ]";
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
+  
     
 }

@@ -35,17 +35,18 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "City.findByName", query = "SELECT c FROM City c WHERE c.name = :name")})
 public class City implements Serializable {
 
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "name")
+    private String name;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "city_id")
     private Integer cityId;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "name")
-    private String name;
     @OneToMany(mappedBy = "cityId")
     private List<User> userList;
 
@@ -69,13 +70,6 @@ public class City implements Serializable {
         this.cityId = cityId;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     @XmlTransient
     public List<User> getUserList() {
@@ -109,6 +103,14 @@ public class City implements Serializable {
     @Override
     public String toString() {
         return "entities.City[ cityId=" + cityId + " ]";
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
     
 }

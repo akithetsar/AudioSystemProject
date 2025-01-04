@@ -5,7 +5,9 @@
  */
 package com.mycompany.rest.api.resources;
 
+import entities.Subscription;
 import entities.User;
+import java.util.HashMap;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -14,6 +16,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import jmsMessaging.QueryMessager;
 
 /**
  *
@@ -21,19 +24,27 @@ import javax.ws.rs.core.Response;
  */
 
 @Path("/subscriptions")
-public class SubscriptionsResource {
+public class SubscriptionsResource extends ResourceBase {
     
     @Path("/{user_id}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTracks(@PathParam("user_id") String userId){
-        return Response.status(Response.Status.CREATED).build();
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
+        HashMap<String, String> params = new HashMap<>();
+        params.put("columns", "*");
+        params.put("tables", "subscription");
+        params.put("where", "user_id=" + userId);
+        return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.THREE);
     }
     
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createTrack(User user){
-        return Response.status(Response.Status.CREATED).build();
+    public Response createTrack(Subscription sub){
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
+        HashMap<String, String> params = new HashMap<>();
+        params.put("tables", "subscription");
+        return queryMessager.sendMessage(sub, params, QueryMessager.Subsystem.THREE);
     }
 }

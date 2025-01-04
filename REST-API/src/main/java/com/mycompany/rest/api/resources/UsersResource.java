@@ -5,7 +5,12 @@
  */
 package com.mycompany.rest.api.resources;
 
+import DTOs.UserDTO;
+import entities.City;
 import entities.User;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -16,6 +21,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import jmsMessaging.QueryMessager;
 
 /**
  *
@@ -23,31 +29,47 @@ import javax.ws.rs.core.Response;
  */
 
 @Path("/users")
-public class UsersResource {
+public class UsersResource extends ResourceBase {
      
+    
+    //Retrieve all users
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsers(){
-        return Response.status(Response.Status.CREATED).build();
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
+        HashMap<String, String> params = new HashMap<>();
+        params.put("operation", "19");
+        return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.ONE);
     }
     
+    //Create new user
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createUser(User user){
-        return Response.status(Response.Status.CREATED).build();
-    }
-    
-    
-    @Path("/{user_id}")
-    @PUT()
-    public Response updateUser(@QueryParam("email") String email, @QueryParam("city") String city, @PathParam("user_id") String userId){
-        if(email==null){
-            System.out.println("Null");
+    public Response createUser(UserDTO user){
+        if(user == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Please provide json object to add").build();
         }
-        System.out.println("Email: " + email);
-        System.out.println("City: " + city);
-        return Response.status(Response.Status.CREATED).entity(email).build();
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
+        HashMap<String, String> params = new HashMap<>();
+        params.put("operation", "2");
+        return queryMessager.sendMessage(user, params, QueryMessager.Subsystem.ONE);
     }
+    
+    //Update email and/or city of a user with id
+    @Path("/{user_id}")
+    @PUT
+    public Response updateUser(@QueryParam("email") String email, @QueryParam("city") Integer city, @PathParam("user_id") String userId) {
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
+
+        HashMap<String, String> params = new HashMap<>();
+        params.put("operation", "3");
+        params.put("email", email);
+        params.put("city", city.toString());
+        params.put("user_id", userId);
+        return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.ONE);
+    }
+
+
     
 }

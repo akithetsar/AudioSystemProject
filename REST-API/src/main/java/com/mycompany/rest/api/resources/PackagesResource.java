@@ -5,7 +5,11 @@
  */
 package com.mycompany.rest.api.resources;
 
-import entities.User;
+import DTOs.PackageDTO;
+import entities.Package;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -16,38 +20,54 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import jmsMessaging.QueryMessager;
 
 /**
  *
  * @author akith
  */
 @Path("/Packages")
-public class PackagesResource {
+public class PackagesResource extends ResourceBase {
     
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTracks(){
-        return Response.status(Response.Status.CREATED).build();
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
+        HashMap<String, String> params = new HashMap<>();
+        params.put("columns", "*");
+        params.put("tables", "package");
+        return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.THREE);
     }
     
+    //Create new package
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createTrack(User user){
-        return Response.status(Response.Status.CREATED).build();
+    public Response createTrack(PackageDTO pack){
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
+        HashMap<String, String> params = new HashMap<>();
+        params.put("operation", "9");
+        return queryMessager.sendMessage(pack, params, QueryMessager.Subsystem.THREE);
     }
     
     
+    //Update monthly price for package
     @Path("/{package_id}")
     @PUT()
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateTrack(@QueryParam("price") Double price, @PathParam("package_id") String packageId){
-        if(price==null){
-            System.out.println("Null");
+        if(price == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Please provide at least one query param to change").build();
         }
-        System.out.println("Name: " + price);
         
-        return Response.status(Response.Status.CREATED).build();
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
+
+        HashMap<String, String> params = new HashMap<>();
+        params.put("operation", "10");
+        params.put("price", price.toString());
+        params.put("package_id", packageId);
+        
+        return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.THREE);
     }
 }

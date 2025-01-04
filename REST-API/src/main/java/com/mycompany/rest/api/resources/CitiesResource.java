@@ -5,17 +5,8 @@
  */
 package com.mycompany.rest.api.resources;
 
-import entities.City;
-import java.util.ArrayList;
+import DTOs.CityDTO;
 import java.util.HashMap;
-import java.util.List;
-import javax.annotation.Resource;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSContext;
-import javax.jms.JMSProducer;
-import javax.jms.ObjectMessage;
-import javax.jms.Queue;
-import javax.jms.TextMessage;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -30,41 +21,39 @@ import jmsMessaging.QueryMessager;
  * @author akith
  */
 @Path("/cities")
-public class CitiesResource {
+public class CitiesResource extends ResourceBase {
     
  
-    @Resource(lookup="jms/__defaultConnectionFactory")
-    private ConnectionFactory connFactory;
-    
-    @Resource(lookup="subsystemOneQueue")
-    private Queue queue;
     
     
+    //Retrieve all cities
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCities(){
         
-        QueryMessager queryMessager = new QueryMessager(connFactory, queue);
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
-        params.put("columns", "*");
-        params.put("tables", "city");
-        return queryMessager.sendMessage(null, params, QueryMessager.Operation.READ, QueryMessager.Subsystem.ONE);
+        params.put("operation", "18");
+        return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.ONE);
 
    
   
     }
     
+    //Create a new city
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createCity(City city){
-        QueryMessager queryMessager = new QueryMessager(connFactory, queue);
+    public Response createCity(CityDTO city){
+        if(city == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Please provide json object to add").build();
+        }
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
-        params.put("tables", "city");
-        return queryMessager.sendMessage(city, params, QueryMessager.Operation.READ, QueryMessager.Subsystem.ONE);
-         
+        params.put("operation", "1");
+        return queryMessager.sendMessage(city, params, QueryMessager.Subsystem.ONE);
         
-    }
+      }
     
     
 }

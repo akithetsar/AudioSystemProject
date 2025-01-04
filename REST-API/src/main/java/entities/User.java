@@ -40,12 +40,6 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "User.findByGender", query = "SELECT u FROM User u WHERE u.gender = :gender")})
 public class User implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "user_id")
-    private Integer userId;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
@@ -64,6 +58,13 @@ public class User implements Serializable {
     @Size(max = 6)
     @Column(name = "gender")
     private String gender;
+
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "user_id")
+    private Integer userId;
     @OneToMany(mappedBy = "userId")
     private List<Favorites> favoritesList;
     @OneToMany(mappedBy = "userId")
@@ -100,21 +101,6 @@ public class User implements Serializable {
         this.userId = userId;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
     public int getBirthYear() {
         return birthYear;
@@ -124,13 +110,6 @@ public class User implements Serializable {
         this.birthYear = birthYear;
     }
 
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
 
     @XmlTransient
     public List<Favorites> getFavoritesList() {
@@ -208,6 +187,32 @@ public class User implements Serializable {
     @Override
     public String toString() {
         return "entities.User[ userId=" + userId + " ]";
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
     
 }

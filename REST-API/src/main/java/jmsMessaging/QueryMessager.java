@@ -5,6 +5,7 @@
  */
 package jmsMessaging;
 
+import entities.City;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ import javax.jms.JMSProducer;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.Queue;
+import javax.jms.Topic;
 import javax.ws.rs.core.Response;
 
 /**
@@ -28,11 +30,12 @@ public class QueryMessager {
     
     
     private ConnectionFactory connFactory;
+    private Topic topic;
     private Queue queue;
     
-    
-    public QueryMessager(ConnectionFactory connFactory, Queue queue){
+    public QueryMessager(ConnectionFactory connFactory, Topic topic, Queue queue){
         this.connFactory = connFactory;
+        this.topic = topic;
         this.queue = queue;
     }
 
@@ -44,14 +47,8 @@ public class QueryMessager {
         THREE
     }
     
-    public enum Operation{
-        CREATE,
-        READ,
-        UPDATE,
-        DELETE
-    }
-    public static String[] operationStrings = {"create", "read", "update", "delete"};
-    public Response sendMessage(Serializable obj, HashMap<String, String> params, Operation operation, Subsystem subsystem) {
+
+    public Response sendMessage(Serializable obj, HashMap<String, String> params, Subsystem subsystem) {
         try{
         
             
@@ -59,7 +56,6 @@ public class QueryMessager {
             JMSContext context = connFactory.createContext();
             JMSProducer producer = context.createProducer();
 
-            Queue tempQueue = context.createTemporaryQueue();
             ObjectMessage objMsg = context.createObjectMessage(obj);
             
             if(params!=null){
@@ -69,12 +65,12 @@ public class QueryMessager {
                     objMsg.setStringProperty(key, value);
                 }
             }
-            objMsg.setStringProperty("operation", operationStrings[operation.ordinal()]);
-            objMsg.setJMSReplyTo(tempQueue);
-            producer.send(queue, objMsg);
+            objMsg.setJMSReplyTo(queue);
+            objMsg.setIntProperty("subsystem", subsystem.ordinal());
+            producer.send(topic, objMsg);
 
 
-            return formResponse(consumeMessage(context, tempQueue));
+            return formResponse(consumeMessage(context, queue));
         } catch (JMSException e) {
                 
                  return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -83,9 +79,23 @@ public class QueryMessager {
     }
     }
    
-    
+//    public Serializable test()  {
+//        
+//        try{
+//            
+//        JMSContext context = connFactory.createContext();
+//            JMSConsumer consumer = context.createConsumer(queue);
+//            Message msg = consumer.receive(TIMEOUT_TIME);
+//            if(msg != null){
+//            System.out.println(msg.getStringProperty("operation"));
+//            System.out.println(msg.getStringProperty("columns"));
+//            return (((ObjectMessage)(msg)).getObject());
+//            }
+//            } catch (JMSException e) {   }
+//        return null;
+//    }
   private ObjectMessage consumeMessage(JMSContext context, Queue tempQueue) throws JMSException {
-        JMSConsumer consumer = context.createConsumer(tempQueue); // Use the same context for consuming
+        JMSConsumer consumer = context.createConsumer(tempQueue); 
         Message response = consumer.receive(TIMEOUT_TIME);
 
         if (response == null) {
