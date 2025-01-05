@@ -60,6 +60,9 @@ public class UsersResource extends ResourceBase {
     @Path("/{user_id}")
     @PUT
     public Response updateUser(@QueryParam("email") String email, @QueryParam("city") Integer city, @PathParam("user_id") String userId) {
+        if(email == null && city == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Please provide at least one query param to change").build();
+        }
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
 
         HashMap<String, String> params = new HashMap<>();
@@ -70,6 +73,24 @@ public class UsersResource extends ResourceBase {
         return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.ONE);
     }
 
+    
+    //Delegates to subscriptions subresource
+    @Path("/{user_id}/subscriptions")
+    public SubscriptionsResource getSubscriptionsResource(){
+        return new SubscriptionsResource(connFactory, topic, queue);
+    }
+    
+    //Delegates to listenings subresource
+    @Path("/{user_id}/listenings")
+    public ListeningsResource getListeningsResource(){
+        return new ListeningsResource(connFactory, topic, queue);
+    }
 
+    
+    //Delegates to favorites subresource
+    @Path("/{user_id}/favorites")
+    public FavoritesResource getFavoritesResource(){
+        return new FavoritesResource(connFactory, topic, queue);
+    }
     
 }

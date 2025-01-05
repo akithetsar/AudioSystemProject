@@ -8,6 +8,9 @@ package com.mycompany.rest.api.resources;
 import entities.Favorites;
 import entities.User;
 import java.util.HashMap;
+import javax.jms.ConnectionFactory;
+import javax.jms.Queue;
+import javax.jms.Topic;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -22,28 +25,43 @@ import jmsMessaging.QueryMessager;
  *
  * @author akith
  */
-@Path("/favorites")
+
 public class FavoritesResource extends ResourceBase {
+
+    public FavoritesResource(){
+        
+    }
     
-    @Path("/{user_id}")
+    public FavoritesResource(ConnectionFactory connFactory, Topic topic, Queue queue) {
+        super.connFactory = connFactory;
+        super.topic = topic;
+        super.queue = queue;
+    }
+    
+    
+    //Retrieve all favorites of user
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getTracks(@PathParam("user_id") String userId){
+    public Response getTracks(@PathParam("user_id") Integer userId){
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
-        params.put("columns", "*");
-        params.put("tables", "favorites");
-        params.put("where", "user_id=" + userId);
+        params.put("operation", "27");
+        params.put("user_id", userId.toString());
+        System.out.println("Listenings for user: " + userId);
         return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.THREE);
     }
     
+    //Adds track to users favorites
+    @Path("/{track_id}")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createTrack(Favorites favorite){
+    public Response createTrack(Favorites favorite, @PathParam("user_id") Integer userId, @PathParam("track_id") Integer trackId){
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
-        params.put("tables", "favorites");
+        params.put("operation", "13");
+        params.put("user_id", userId.toString());
+        params.put("track_id", userId.toString());
         return queryMessager.sendMessage(favorite, params, QueryMessager.Subsystem.THREE);
     }
     

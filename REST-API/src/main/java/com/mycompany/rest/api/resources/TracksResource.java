@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -31,14 +32,13 @@ import jmsMessaging.QueryMessager;
 @Path("/tracks")
 public class TracksResource extends ResourceBase {
     
-    
+    //Retrive all audio tracks
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTracks(){
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
-        params.put("columns", "*");
-        params.put("tables", "audiotrack");
+        params.put("operation", "21");
         return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.TWO);
     }
     
@@ -88,14 +88,31 @@ public class TracksResource extends ResourceBase {
 
     }
     
+    //Retrieve all categories of audio track
     @Path("/{track_id}/categories")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getTrackCategories(@PathParam("track_id") String trackId){
+    public Response getTrackCategories(@PathParam("track_id") Integer trackId){
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
-        params.put("columns", "*");
-        params.put("tables", "audiotrack");
-        params.put("where", "track_id=" + trackId);
+        params.put("operation", "22");
+        params.put("track_id", trackId.toString());
         return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.TWO);
+    }
+    
+    //Delete track
+    @Path("/{track_id}")
+    @DELETE
+    public Response deleteTrack(@PathParam("track_id") String trackId){
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
+        HashMap<String, String> params = new HashMap<>();
+        params.put("operation", "17");
+        params.put("track_id", trackId);
+        return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.TWO);
+    }
+    
+    //Delegates to ratings subresource
+    @Path("/{track_id}/ratings")
+    public RatingsResource createRatingsResource(){
+        return new RatingsResource(connFactory, topic, queue);
     }
 }

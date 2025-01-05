@@ -29,14 +29,13 @@ import jmsMessaging.QueryMessager;
 @Path("/Packages")
 public class PackagesResource extends ResourceBase {
     
-    
+    //Retrieve all packages
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTracks(){
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
-        params.put("columns", "*");
-        params.put("tables", "package");
+        params.put("operation", "23");
         return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.THREE);
     }
     

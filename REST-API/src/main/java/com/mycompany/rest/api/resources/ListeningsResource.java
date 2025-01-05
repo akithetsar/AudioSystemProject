@@ -5,15 +5,20 @@
  */
 package com.mycompany.rest.api.resources;
 
+import DTOs.ListeningDTO;
 import entities.Listening;
 import entities.User;
 import java.util.HashMap;
+import javax.jms.ConnectionFactory;
+import javax.jms.Queue;
+import javax.jms.Topic;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import jmsMessaging.QueryMessager;
@@ -22,27 +27,47 @@ import jmsMessaging.QueryMessager;
  *
  * @author akith
  */
-@Path("/listenings")
+
 public class ListeningsResource extends ResourceBase {
-    @Path("/{track_id}")
+
+    
+    public ListeningsResource(){
+        
+    }
+    
+    public ListeningsResource(ConnectionFactory connFactory, Topic topic, Queue queue) {
+        super.connFactory = connFactory;
+        super.topic = topic;
+        super.queue = queue;
+    }
+    
+    
+    
+    //Retrieve all listenings for user
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getTracks(@PathParam("track_id") String userId){
+    public Response getTracks(@PathParam("user_id") Integer userId){
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
-        params.put("columns", "*");
-        params.put("tables", "listening");
-        params.put("where", "track_id=" + userId);
+        params.put("operation", "25");
+        params.put("user_id", userId.toString());
+        System.out.println("Listenings for user: " + userId);
         return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.THREE);
     }
     
+    
+    //Creates new track listening for user
+    @Path("/{track_id}")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createTrack(Listening listening){
+    public Response createTrack(ListeningDTO listening, @PathParam("user_id") Integer userId, @PathParam("track_id") Integer trackId){
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
-        params.put("tables", "listening");
+        params.put("operation", "12");
+        params.put("user_id", userId.toString());
+        params.put("track_id", trackId.toString());
+        System.out.println("listenings");
         return queryMessager.sendMessage(listening, params, QueryMessager.Subsystem.THREE);
 }
 

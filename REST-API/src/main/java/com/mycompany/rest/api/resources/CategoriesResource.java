@@ -24,13 +24,14 @@ import jmsMessaging.QueryMessager;
 
 @Path("/categories")
 public class CategoriesResource extends ResourceBase{
+    
+    //Retrieve all categories
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCategories(){
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
-        params.put("columns", "*");
-        params.put("tables", "category");
+        params.put("operation", "20");
         return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.TWO);
     }
     

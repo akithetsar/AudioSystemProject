@@ -50,8 +50,6 @@ public class QueryMessager {
 
     public Response sendMessage(Serializable obj, HashMap<String, String> params, Subsystem subsystem) {
         try{
-        
-            
 
             JMSContext context = connFactory.createContext();
             JMSProducer producer = context.createProducer();
@@ -66,7 +64,7 @@ public class QueryMessager {
                 }
             }
             objMsg.setJMSReplyTo(queue);
-            objMsg.setIntProperty("subsystem", subsystem.ordinal());
+            objMsg.setIntProperty("subsystem", subsystem.ordinal() + 1);
             producer.send(topic, objMsg);
 
 

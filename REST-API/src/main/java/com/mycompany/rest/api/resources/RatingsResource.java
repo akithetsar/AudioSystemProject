@@ -5,8 +5,15 @@
  */
 package com.mycompany.rest.api.resources;
 
+import DTOs.FavoritesDTO;
+import DTOs.RatingDTO;
 import entities.User;
+import java.util.HashMap;
+import javax.jms.ConnectionFactory;
+import javax.jms.Queue;
+import javax.jms.Topic;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -16,35 +23,76 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import jmsMessaging.QueryMessager;
 
 /**
  *
  * @author akith
  */
-@Path("/ratings")
-public class RatingsResource {
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsers(){
-        return Response.status(Response.Status.CREATED).build();
+
+public class RatingsResource extends ResourceBase {
+
+    public RatingsResource(){
+        
     }
     
+    public RatingsResource(ConnectionFactory connFactory, Topic topic, Queue queue) {
+       super.connFactory = connFactory;
+       super.topic = topic;
+       super.queue = queue;
+    }
+    
+    //Retrieve all ratings for track
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUsers(@PathParam("track_id") Integer trackId){
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
+        HashMap<String, String> params = new HashMap<>();
+        params.put("operation", "26");
+        params.put("track_id", trackId.toString());
+        System.out.println("Ratings for track: " + trackId);
+        return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.THREE);
+    }
+    
+    //Creates new rating on track by user
+    @Path("/{user_id}")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createUser(User user){
-        return Response.status(Response.Status.CREATED).build();
+    public Response createUserRating(FavoritesDTO favorite, @PathParam("user_id") Integer userId, @PathParam("track_id") Integer trackId){
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
+        HashMap<String, String> params = new HashMap<>();
+        params.put("operation", "14");
+        params.put("user_id", userId.toString());
+        params.put("track_id", userId.toString());
+        return queryMessager.sendMessage(favorite, params, QueryMessager.Subsystem.THREE);
     }
     
     
-    @Path("/{track_id}")
-    @PUT()
-    public Response updateUser(@QueryParam("rating") Integer rating, @PathParam("track_id") String ratingId){
-        if(rating==null){
-            System.out.println("Null");
-        }
-        System.out.println("Rating: " + rating);
+    //Change users rating for track
+    @Path("/{user_id}")
+    @PUT
+    public Response updateUserRating(RatingDTO rating, @PathParam("track_id") Integer trackId, @PathParam("user_id") Integer userId){
         
-        return Response.status(Response.Status.CREATED).build();
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
+        HashMap<String, String> params = new HashMap<>();
+        params.put("operation", "15");
+        params.put("user_id", userId.toString());
+        params.put("track_id", trackId.toString());
+        
+        return queryMessager.sendMessage(rating, params, QueryMessager.Subsystem.THREE);
+    }
+    
+    //Deletes users rating for track
+    @Path("/{user_id}")
+    @DELETE
+    public Response deleteUserRating(@PathParam("track_id") Integer trackId, @PathParam("user_id") Integer userId){
+        QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
+        HashMap<String, String> params = new HashMap<>();
+        params.put("operation", "16");
+        params.put("user_id", userId.toString());
+        params.put("track_id", trackId.toString());
+        
+        return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.THREE);
     }
 }
