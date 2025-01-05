@@ -50,6 +50,8 @@ public class TracksResource extends ResourceBase {
         if(track == null){
             return Response.status(Response.Status.BAD_REQUEST).entity("Please provide json object to add").build();
         }
+        if(track == null) return Response.status(Response.Status.NO_CONTENT).entity("Please provide a json body").build();
+
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "6");

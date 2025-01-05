@@ -47,9 +47,7 @@ public class UsersResource extends ResourceBase {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUser(UserDTO user){
-        if(user == null){
-            return Response.status(Response.Status.BAD_REQUEST).entity("Please provide json object to add").build();
-        }
+        if(user == null) return Response.status(Response.Status.BAD_REQUEST).entity("Please provide a json body").build();
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "2");
@@ -62,6 +60,9 @@ public class UsersResource extends ResourceBase {
     public Response updateUser(@QueryParam("email") String email, @QueryParam("city") Integer city, @PathParam("user_id") String userId) {
         if(email == null && city == null){
             return Response.status(Response.Status.BAD_REQUEST).entity("Please provide at least one query param to change").build();
+        }
+        if(userId == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("user_id not provided").build();
         }
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
 

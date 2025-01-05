@@ -41,6 +41,7 @@ public class CategoriesResource extends ResourceBase{
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createCategory(CategoryDTO category){
+        if(category == null) return Response.status(Response.Status.NO_CONTENT).entity("Please provide a json body").build();
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "5");

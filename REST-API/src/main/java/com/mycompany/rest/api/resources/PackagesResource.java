@@ -44,6 +44,7 @@ public class PackagesResource extends ResourceBase {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createTrack(PackageDTO pack){
+        if(pack == null) return Response.status(Response.Status.NO_CONTENT).entity("Please provide a json body").build();
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "9");
@@ -59,7 +60,9 @@ public class PackagesResource extends ResourceBase {
         if(price == null){
             return Response.status(Response.Status.BAD_REQUEST).entity("Please provide at least one query param to change").build();
         }
-        
+        if(packageId == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("package_id not provided").build();
+        }
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
 
         HashMap<String, String> params = new HashMap<>();

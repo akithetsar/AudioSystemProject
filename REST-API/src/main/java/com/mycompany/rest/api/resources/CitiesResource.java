@@ -45,9 +45,7 @@ public class CitiesResource extends ResourceBase {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createCity(CityDTO city){
-        if(city == null){
-            return Response.status(Response.Status.BAD_REQUEST).entity("Please provide json object to add").build();
-        }
+        if(city == null) return Response.status(Response.Status.NO_CONTENT).entity("Please provide a json body").build();
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "1");

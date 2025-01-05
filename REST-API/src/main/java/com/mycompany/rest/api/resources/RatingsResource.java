@@ -46,6 +46,9 @@ public class RatingsResource extends ResourceBase {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsers(@PathParam("track_id") Integer trackId){
+        if(trackId == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("track_id not provided").build();
+        }
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "26");
@@ -60,6 +63,9 @@ public class RatingsResource extends ResourceBase {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createUserRating(FavoritesDTO favorite, @PathParam("user_id") Integer userId, @PathParam("track_id") Integer trackId){
+        if(userId == null || trackId == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("track_id or user_id not provided").build();
+        }
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "14");
@@ -73,7 +79,10 @@ public class RatingsResource extends ResourceBase {
     @Path("/{user_id}")
     @PUT
     public Response updateUserRating(RatingDTO rating, @PathParam("track_id") Integer trackId, @PathParam("user_id") Integer userId){
-        
+        if(userId == null || trackId == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("track_id or user_id not provided").build();
+        }
+        if(rating == null) return Response.status(Response.Status.NO_CONTENT).entity("Please provide a json body").build();
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "15");
@@ -87,6 +96,9 @@ public class RatingsResource extends ResourceBase {
     @Path("/{user_id}")
     @DELETE
     public Response deleteUserRating(@PathParam("track_id") Integer trackId, @PathParam("user_id") Integer userId){
+        if(userId == null || trackId == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("track_id or user_id not provided").build();
+        }
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "16");

@@ -6,7 +6,6 @@
 package com.mycompany.rest.api.resources;
 
 import entities.Favorites;
-import entities.User;
 import java.util.HashMap;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
@@ -43,6 +42,9 @@ public class FavoritesResource extends ResourceBase {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTracks(@PathParam("user_id") Integer userId){
+        if(userId == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("user_id not provided").build();
+        }
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "27");
@@ -57,6 +59,10 @@ public class FavoritesResource extends ResourceBase {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createTrack(Favorites favorite, @PathParam("user_id") Integer userId, @PathParam("track_id") Integer trackId){
+        if(userId == null || trackId == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("track_id or user_id not provided").build();
+        }
+        if(favorite == null) return Response.status(Response.Status.NO_CONTENT).entity("Please provide a json body").build();
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "13");
