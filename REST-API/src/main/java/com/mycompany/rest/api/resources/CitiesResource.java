@@ -30,14 +30,12 @@ public class CitiesResource extends ResourceBase {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCities(){
-        
+        System.out.println("cities");
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "18");
         return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.ONE);
 
-   
-  
     }
     
     //Create a new city

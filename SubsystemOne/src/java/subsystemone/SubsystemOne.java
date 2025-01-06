@@ -7,6 +7,7 @@ package subsystemone;
 
 import entities.City;
 import java.io.Serializable;
+import java.util.function.BiConsumer;
 import javax.annotation.Resource;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -43,22 +44,6 @@ public class SubsystemOne {
     
     public static void main(String[] args) {
         
-//        EntityManagerFactory emf = Persistence.createEntityManagerFactory("SubsystemOnePU");
-//        EntityManager em = emf.createEntityManager();
-//         
-//        try{
-//            EntityTransaction transaction = em.getTransaction();
-//            City city = new City();
-//            city.setName("Subotica");
-//            
-//            transaction.begin();
-//            em.persist(city);
-//            transaction.commit();
-//         }
-//         finally{
-//            if(em.getTransaction().isActive()) em.getTransaction().rollback();
-//            emf.close();
-//        }
          try (JMSContext context = connFactory.createContext()) {
             // Filter messages for this subsystem using a MessageSelector
             String messageSelector = "subsystem = " + SUBSYSTEM_ID;
@@ -86,16 +71,13 @@ public class SubsystemOne {
             System.out.println("Subsystem " + SUBSYSTEM_ID + " received operation: " + operation);
             System.out.println("Payload: " + payload);
 
-            // Process the message (add your own logic here)
-            Serializable responsePayload = performTask(payload, operation);
-
+                    
             // Send the response back to the ReplyTo queue
             Destination replyTo = message.getJMSReplyTo();
             if (replyTo != null) {
                 JMSProducer producer = context.createProducer();
+                Message responseMessage = performTask(payload, operation, context);
 
-                ObjectMessage responseMessage = context.createObjectMessage(responsePayload);
-                responseMessage.setIntProperty("status", 200); // Set response status
                 producer.send(replyTo, responseMessage);
 
                 System.out.println("Subsystem " + SUBSYSTEM_ID + " sent response.");
@@ -105,9 +87,19 @@ public class SubsystemOne {
         }
     }
     
-    private static Serializable performTask(Serializable payload, String operation){
-        
-        return "Processed by Subsystem " + SUBSYSTEM_ID + ": " + payload;
+    private static Message performTask(Serializable payload, String operation, JMSContext context) throws JMSException {
+        Operation operationHandler = Operations.getOperation(operation);
+       
+        if (operationHandler != null) {
+            return operationHandler.execute(payload, context);
+        } else {
+            System.out.println("no op");
+            ObjectMessage responseMsg = context.createObjectMessage("The operation " + operation + " is not implemented on subsystem " + SUBSYSTEM_ID);
+            responseMsg.setIntProperty("status", 400);
+            return responseMsg;
     }
+}
+
+    
     
 }

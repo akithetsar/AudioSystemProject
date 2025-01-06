@@ -18,6 +18,7 @@ import javax.jms.JMSProducer;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.Queue;
+import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.ws.rs.core.Response;
 
@@ -50,7 +51,7 @@ public class QueryMessager {
 
     public Response sendMessage(Serializable obj, HashMap<String, String> params, Subsystem subsystem) {
         try{
-
+            System.out.println("REST: Entering sendMessage");
             JMSContext context = connFactory.createContext();
             JMSProducer producer = context.createProducer();
 
@@ -66,6 +67,7 @@ public class QueryMessager {
             objMsg.setJMSReplyTo(queue);
             objMsg.setIntProperty("subsystem", subsystem.ordinal() + 1);
             producer.send(topic, objMsg);
+            System.out.println("REST: Sent message to " + objMsg.getIntProperty("subsystem"));
 
 
             return formResponse(consumeMessage(context, queue));
@@ -93,6 +95,7 @@ public class QueryMessager {
 //        return null;
 //    }
   private ObjectMessage consumeMessage(JMSContext context, Queue tempQueue) throws JMSException {
+        System.out.println("REST: Entering consumeMessage");
         JMSConsumer consumer = context.createConsumer(tempQueue); 
         Message response = consumer.receive(TIMEOUT_TIME);
 
@@ -102,13 +105,15 @@ public class QueryMessager {
 
         if (response instanceof ObjectMessage) {
             return (ObjectMessage) response;
-        } else {
+        } 
+        else {
             throw new JMSException("Unexpected message type received");
         }
     }
 
    
     private Response formResponse(ObjectMessage msg) throws JMSException {
+        System.out.println("REST: Entering formResponse");
         int status = msg.getIntProperty("status");
         return Response.status(status).entity(msg.getObject()).build();
     }
