@@ -5,8 +5,8 @@
  */
 package subsystemone;
 
+import entities.City;
 import java.io.Serializable;
-import java.util.Queue;
 import javax.annotation.Resource;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -16,8 +16,13 @@ import javax.jms.JMSException;
 import javax.jms.JMSProducer;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
+import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
 /**
  *
  * @author akith
@@ -27,16 +32,33 @@ public class SubsystemOne {
     @Resource(lookup = "jms/__defaultConnectionFactory")
     private static ConnectionFactory connFactory;
 
-    @Resource(lookup = "subsystemOneQueue")
+    @Resource(lookup = "audioSystemQueue")
     private static Queue queue;
 
-    @Resource(lookup = "subsystemTopic")
+    @Resource(lookup = "audioSystemTopic")
     private static Topic topic;
     
     private static final int SUBSYSTEM_ID = 1;
 
     
     public static void main(String[] args) {
+        
+//        EntityManagerFactory emf = Persistence.createEntityManagerFactory("SubsystemOnePU");
+//        EntityManager em = emf.createEntityManager();
+//         
+//        try{
+//            EntityTransaction transaction = em.getTransaction();
+//            City city = new City();
+//            city.setName("Subotica");
+//            
+//            transaction.begin();
+//            em.persist(city);
+//            transaction.commit();
+//         }
+//         finally{
+//            if(em.getTransaction().isActive()) em.getTransaction().rollback();
+//            emf.close();
+//        }
          try (JMSContext context = connFactory.createContext()) {
             // Filter messages for this subsystem using a MessageSelector
             String messageSelector = "subsystem = " + SUBSYSTEM_ID;

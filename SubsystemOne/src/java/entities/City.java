@@ -17,6 +17,8 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -40,6 +42,8 @@ public class City implements Serializable {
     @Column(name = "city_id")
     private Integer cityId;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
     @Column(name = "name")
     private String name;
     @OneToMany(mappedBy = "cityId")
@@ -104,7 +108,7 @@ public class City implements Serializable {
 
     @Override
     public String toString() {
-        return "entities.City[ cityId=" + cityId + " ]";
+        return "subsystemone.City[ cityId=" + cityId + " ]";
     }
     
 }
