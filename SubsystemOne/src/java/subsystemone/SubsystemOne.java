@@ -76,7 +76,7 @@ public class SubsystemOne {
             Destination replyTo = message.getJMSReplyTo();
             if (replyTo != null) {
                 JMSProducer producer = context.createProducer();
-                Message responseMessage = performTask(payload, operation, context);
+                Message responseMessage = performTask(message, operation, context);
 
                 producer.send(replyTo, responseMessage);
 
@@ -87,11 +87,11 @@ public class SubsystemOne {
         }
     }
     
-    private static Message performTask(Serializable payload, String operation, JMSContext context) throws JMSException {
+    private static Message performTask(Message msg, String operation, JMSContext context) throws JMSException {
         Operation operationHandler = Operations.getOperation(operation);
        
         if (operationHandler != null) {
-            return operationHandler.execute(payload, context);
+            return operationHandler.execute(msg, context);
         } else {
             System.out.println("no op");
             ObjectMessage responseMsg = context.createObjectMessage("The operation " + operation + " is not implemented on subsystem " + SUBSYSTEM_ID);

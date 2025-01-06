@@ -57,7 +57,7 @@ public class UsersResource extends ResourceBase {
     //Update email and/or city of a user with id
     @Path("/{user_id}")
     @PUT
-    public Response updateUser(@QueryParam("email") String email, @QueryParam("city") Integer city, @PathParam("user_id") String userId) {
+    public Response updateUser(@QueryParam("email") String email, @QueryParam("city") String city, @PathParam("user_id") String userId) {
         if(email == null && city == null){
             return Response.status(Response.Status.BAD_REQUEST).entity("Please provide at least one query param to change").build();
         }
@@ -68,8 +68,8 @@ public class UsersResource extends ResourceBase {
 
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "3");
-        params.put("email", email);
-        params.put("city", city.toString());
+        params.put("email", email != null ? email : "null");
+        params.put("city", city != null ? city.toString() : "null");
         params.put("user_id", userId);
         return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.ONE);
     }
