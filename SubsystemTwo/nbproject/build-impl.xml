@@ -767,17 +767,20 @@ exists or setup the property manually. For example like this:
     <target depends="compile" if="is.server.weblogic" name="library-inclusion-in-archive">
         <basename file="${file.reference.mysql-connector-j-9.1.0.jar}" property="manifest.file.reference.mysql-connector-j-9.1.0.jar"/>
         <basename file="${libs.eclipselink.classpath}" property="manifest.libs.eclipselink.classpath"/>
+        <basename file="${libs.javaee-api-8.0.classpath}" property="manifest.libs.javaee-api-8.0.classpath"/>
         <manifest file="${build.ear.classes.dir}/META-INF/MANIFEST.MF" mode="update">
-            <attribute name="Extension-List" value="jar-1 jar-2 "/>
+            <attribute name="Extension-List" value="jar-1 jar-2 jar-3 "/>
             <attribute name="jar-1-Extension-Name" value="${manifest.file.reference.mysql-connector-j-9.1.0.jar}"/>
             <attribute name="jar-2-Extension-Name" value="${manifest.libs.eclipselink.classpath}"/>
+            <attribute name="jar-3-Extension-Name" value="${manifest.libs.javaee-api-8.0.classpath}"/>
         </manifest>
     </target>
     <target depends="compile" if="dist.ear.dir" name="library-inclusion-in-manifest">
         <copyfiles files="${file.reference.mysql-connector-j-9.1.0.jar}" manifestproperty="manifest.file.reference.mysql-connector-j-9.1.0.jar" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${libs.eclipselink.classpath}" manifestproperty="manifest.libs.eclipselink.classpath" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${libs.javaee-api-8.0.classpath}" manifestproperty="manifest.libs.javaee-api-8.0.classpath" todir="${dist.ear.dir}/lib"/>
         <manifest file="${build.ear.classes.dir}/META-INF/MANIFEST.MF" mode="update">
-            <attribute name="Class-Path" value="${manifest.file.reference.mysql-connector-j-9.1.0.jar} lib/${manifest.file.reference.mysql-connector-j-9.1.0.jar} ${manifest.libs.eclipselink.classpath} lib/${manifest.libs.eclipselink.classpath} "/>
+            <attribute name="Class-Path" value="${manifest.file.reference.mysql-connector-j-9.1.0.jar} lib/${manifest.file.reference.mysql-connector-j-9.1.0.jar} ${manifest.libs.eclipselink.classpath} lib/${manifest.libs.eclipselink.classpath} ${manifest.libs.javaee-api-8.0.classpath} lib/${manifest.libs.javaee-api-8.0.classpath} "/>
         </manifest>
     </target>
     <target name="-copy-meta-inf">

@@ -26,7 +26,6 @@ public class AudiotrackDTO implements Serializable {
     public Date getUploadTimeDate(){
         return uploadTime;
     }
-    
     public void setUploadTime(String uploadTime) {
         try {
             this.uploadTime = dateFormat.parse(uploadTime); // Parse from "yyyy-MM-dd" string

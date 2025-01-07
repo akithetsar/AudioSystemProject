@@ -82,15 +82,17 @@ public class TracksResource extends ResourceBase {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @POST()
-    public Response addCategoryToTrack(@PathParam("track_id") String trackId, CategoryDTO category){
+    public Response addCategoryToTrack(CategoryDTO category, @PathParam("track_id") String trackId){
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "8");
+        params.put("track_id", trackId);
         return queryMessager.sendMessage(category, params, QueryMessager.Subsystem.TWO);
 
     }
     
     //Retrieve all categories of audio track
+    @GET
     @Path("/{track_id}/categories")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTrackCategories(@PathParam("track_id") Integer trackId){
@@ -104,6 +106,7 @@ public class TracksResource extends ResourceBase {
     //Delete track
     @Path("/{track_id}")
     @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
     public Response deleteTrack(@PathParam("track_id") String trackId){
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();

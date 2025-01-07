@@ -13,6 +13,7 @@
             </test-roots>
             <included-library dirs="200">file.reference.mysql-connector-j-9.1.0.jar</included-library>
             <included-library dirs="200">libs.eclipselink.classpath</included-library>
+            <included-library dirs="200">libs.javaee-api-8.0.classpath</included-library>
         </data>
     </configuration>
 </project>
