@@ -9,6 +9,7 @@ public class RatingDTO implements Serializable {
     private String userName;
     private String audioTitle;
     private Character rating;
+    
     private Date timestamp;
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -36,7 +37,7 @@ public class RatingDTO implements Serializable {
         this.rating = rating;
     }
 
-   
+  
     @XmlElement
     public String getTimestamp() {
         if (timestamp != null) {

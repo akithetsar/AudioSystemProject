@@ -26,7 +26,7 @@ import jmsMessaging.QueryMessager;
  *
  * @author akith
  */
-@Path("/Packages")
+@Path("/packages")
 public class PackagesResource extends ResourceBase {
     
     //Retrieve all packages

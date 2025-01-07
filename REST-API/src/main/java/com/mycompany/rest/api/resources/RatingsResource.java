@@ -62,7 +62,7 @@ public class RatingsResource extends ResourceBase {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response createUserRating(FavoritesDTO favorite, @PathParam("user_id") Integer userId, @PathParam("track_id") Integer trackId){
+    public Response createUserRating(RatingDTO favorite, @PathParam("user_id") Integer userId, @PathParam("track_id") Integer trackId){
         if(userId == null || trackId == null){
             return Response.status(Response.Status.BAD_REQUEST).entity("track_id or user_id not provided").build();
         }
@@ -70,7 +70,7 @@ public class RatingsResource extends ResourceBase {
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "14");
         params.put("user_id", userId.toString());
-        params.put("track_id", userId.toString());
+        params.put("track_id", trackId.toString());
         return queryMessager.sendMessage(favorite, params, QueryMessager.Subsystem.THREE);
     }
     

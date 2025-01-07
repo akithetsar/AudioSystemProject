@@ -57,18 +57,18 @@ public class FavoritesResource extends ResourceBase {
     @Path("/{track_id}")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response createTrack(Favorites favorite, @PathParam("user_id") Integer userId, @PathParam("track_id") Integer trackId){
+    
+    public Response createTrack(@PathParam("user_id") Integer userId, @PathParam("track_id") Integer trackId){
         if(userId == null || trackId == null){
             return Response.status(Response.Status.BAD_REQUEST).entity("track_id or user_id not provided").build();
         }
-        if(favorite == null) return Response.status(Response.Status.NO_CONTENT).entity("Please provide a json body").build();
+//        if(favorite == null) return Response.status(Response.Status.NO_CONTENT).entity("Please provide a json body").build();
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "13");
         params.put("user_id", userId.toString());
-        params.put("track_id", userId.toString());
-        return queryMessager.sendMessage(favorite, params, QueryMessager.Subsystem.THREE);
+        params.put("track_id", trackId.toString());
+        return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.THREE);
     }
     
 }
