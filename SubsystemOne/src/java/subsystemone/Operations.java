@@ -9,7 +9,9 @@ import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
 import java.io.Serializable;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import javax.jms.Message;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -26,6 +28,7 @@ public class Operations {
         operationTable.put("2", Operations::operation2);
         operationTable.put("3", Operations::operation3);
         operationTable.put("18", Operations::operation18);
+        operationTable.put("19", Operations::operation19);
         
         // Add other operations here...
     }
@@ -144,7 +147,7 @@ public class Operations {
             if (email != null) {
                 user.setEmail(email);
             }
-            if (cityName != null) {
+            if (cityName != null && !cityName.equals("null")) {
                 try {
                     city = em.createNamedQuery("City.findByName", City.class)
                             .setParameter("name", cityName)
@@ -176,11 +179,63 @@ public class Operations {
         return message;
     }
     
+
     public static ObjectMessage operation18(Message msg, JMSContext context) throws JMSException {
         Serializable payload = ((ObjectMessage) msg).getObject();
         System.out.println("Executing Operation 18 with payload: " + payload);
-        ObjectMessage message = context.createObjectMessage("Operation 18 executed successfully.");
-        message.setIntProperty("status", 200);
+        ObjectMessage message = null;
+        List<City> cities = null;
+        
+        try{    
+            em.getTransaction().begin();
+
+            cities = em.createNamedQuery("City.findAll", City.class).getResultList();
+            
+            em.getTransaction().commit();
+            for(City city : cities){
+                city.setUserList(null);
+            }
+            message = context.createObjectMessage((Serializable) cities);
+            message.setIntProperty("status", 200);
+            }catch (RollbackException e) {
+                em.getTransaction().rollback();
+                return rollbackHandler(e, context);
+
+            }
+            finally{
+                if(em.getTransaction().isActive()) em.getTransaction().rollback();
+               
+            }
+        return message;
+    }
+     
+    
+    public static ObjectMessage operation19(Message msg, JMSContext context) throws JMSException {
+        Serializable payload = ((ObjectMessage) msg).getObject();
+        System.out.println("Executing Operation 19 with payload: " + payload);
+        ObjectMessage message = null;
+        List<User> users = null;
+        
+        try{    
+            em.getTransaction().begin();
+
+            users = em.createQuery("SELECT u FROM User u", User.class).getResultList();
+            
+            em.getTransaction().commit();
+            for(User user : users){
+                user.getCityId().setUserList(null);
+            }
+            message = context.createObjectMessage((Serializable) users);
+            message.setIntProperty("status", 200);
+            }catch (RollbackException e) {
+                em.getTransaction().rollback();
+                return rollbackHandler(e, context);
+
+            }
+            finally{
+                if(em.getTransaction().isActive()) em.getTransaction().rollback();
+               
+            }
         return message;
     }
     
