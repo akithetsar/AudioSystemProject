@@ -44,17 +44,18 @@ public class ListeningsResource extends ResourceBase {
     
     
     //Retrieve all listenings for user
+    
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getTracks(@PathParam("user_id") Integer userId){
-        if(userId == null){
-            return Response.status(Response.Status.BAD_REQUEST).entity("user_id not provided").build();
+    public Response getTracks(@PathParam("track_id") Integer trackId){
+        if(trackId == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("track_id not provided").build();
         }
         QueryMessager queryMessager = new QueryMessager(connFactory, topic, queue);
         HashMap<String, String> params = new HashMap<>();
         params.put("operation", "25");
-        params.put("user_id", userId.toString());
-        System.out.println("Listenings for user: " + userId);
+        params.put("track_id", trackId.toString());
+        System.out.println("Listenings for user: " + trackId);
         return queryMessager.sendMessage(null, params, QueryMessager.Subsystem.THREE);
     }
     

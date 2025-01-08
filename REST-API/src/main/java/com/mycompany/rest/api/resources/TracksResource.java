@@ -120,4 +120,11 @@ public class TracksResource extends ResourceBase {
     public RatingsResource createRatingsResource(){
         return new RatingsResource(connFactory, topic, queue);
     }
+    
+
+    
+    @Path("/{track_id}/listenings")
+    public ListeningsResource createListeningResource(){
+        return new ListeningsResource(connFactory, topic, queue);
+    }
 }
