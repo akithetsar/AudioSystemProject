@@ -42,7 +42,11 @@ public class Operations {
         operationTable.put("12", Operations::operation12);
         operationTable.put("13", Operations::operation13);
         operationTable.put("14", Operations::operation14);
-
+        operationTable.put("15", Operations::operation15);
+        operationTable.put("16", Operations::operation16);
+        operationTable.put("23", Operations::operation23);
+        operationTable.put("24", Operations::operation24);
+        operationTable.put("25", Operations::operation25);
 
         // Add other operations here...
     }
@@ -129,7 +133,7 @@ public class Operations {
         
         return message;
     }
-    
+
     public static ObjectMessage operation11(Message msg, JMSContext context) throws JMSException{
         Serializable payload = ((ObjectMessage) msg).getObject();
         System.out.println("Executing Operation 11 with payload: " + payload);
@@ -334,8 +338,301 @@ public class Operations {
         return message;
     }
 
+    public static ObjectMessage operation15(Message msg, JMSContext context) throws JMSException {
+        Serializable payload = ((ObjectMessage) msg).getObject();
+        System.out.println("Executing Operation 15 with payload: " + payload);
+        ObjectMessage message = null;
+
+        if (payload instanceof RatingDTO) {
+            RatingDTO dto = (RatingDTO) payload;
+            try {
+                int userId = Integer.parseInt(msg.getStringProperty("user_id"));
+                int trackId = Integer.parseInt(msg.getStringProperty("track_id"));
+
+                em.getTransaction().begin();
+
+                // Find User
+                User user = em.find(User.class, userId);
+                if (user == null) {
+                    em.getTransaction().rollback();
+                    message = context.createObjectMessage("User with ID '" + userId + "' not found.");
+                    message.setIntProperty("status", 404);
+                    return message;
+                }
+
+                // Find Audiotrack
+                Audiotrack track = em.find(Audiotrack.class, trackId);
+                if (track == null) {
+                    em.getTransaction().rollback();
+                    message = context.createObjectMessage("Audiotrack with ID '" + trackId + "' not found.");
+                    message.setIntProperty("status", 404);
+                    return message;
+                }
+
+                // Find existing Rating
+                 List<Rating> ratings = em.createQuery(
+                        "SELECT r FROM Rating r WHERE r.userId = :user AND r.audioId = :track", Rating.class)
+                        .setParameter("user", user)
+                        .setParameter("track", track)
+                        .getResultList();
+
+                Rating rating = ratings.isEmpty() ? null : ratings.get(0);
+
+                if (rating == null) {
+                    em.getTransaction().rollback();
+                    message = context.createObjectMessage("Rating not found for user ID '" + userId + "' and track ID '" + trackId + "'.");
+                    message.setIntProperty("status", 404);
+                    return message;
+                }
+
+                // Update the rating
+                rating.setRating(dto.getRating());
+                em.merge(rating);
+
+                em.getTransaction().commit();
+
+                message = context.createObjectMessage("Rating updated successfully.");
+                message.setIntProperty("status", 200);
+
+            } catch (RollbackException e) {
+                em.getTransaction().rollback();
+                return rollbackHandler(e, context);
+            } catch (NumberFormatException e) {
+                message = context.createObjectMessage("Invalid user ID or track ID.");
+                message.setIntProperty("status", 400);
+            } finally {
+                if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            }
+        } else {
+            message = context.createObjectMessage("Operation 15 payload is not of type RatingDTO");
+            message.setIntProperty("status", 500);
+        }
+
+        return message;
+    }
+
+    
+    public static ObjectMessage operation16(Message msg, JMSContext context) throws JMSException {
+        Serializable payload = ((ObjectMessage) msg).getObject();
+        System.out.println("Executing Operation 16 with payload: " + payload);
+        ObjectMessage message = null;
+
+       
+        try {
+            int userId = Integer.parseInt(msg.getStringProperty("user_id"));
+            int trackId = Integer.parseInt(msg.getStringProperty("track_id"));
+
+            em.getTransaction().begin();
+            
+            // Find User
+            User user = em.find(User.class, userId);
+            if (user == null) {
+                em.getTransaction().rollback();
+                message = context.createObjectMessage("User with ID '" + userId + "' not found.");
+                message.setIntProperty("status", 404);
+                return message;
+            }
+
+            // Find Audiotrack
+            Audiotrack track = em.find(Audiotrack.class, trackId);
+            if (track == null) {
+                em.getTransaction().rollback();
+                message = context.createObjectMessage("Audiotrack with ID '" + trackId + "' not found.");
+                message.setIntProperty("status", 404);
+                return message;
+            }
+
+            // Find existing Rating
+            List<Rating> ratings = em.createQuery(
+                    "SELECT r FROM Rating r WHERE r.userId = :user AND r.audioId = :track", Rating.class)
+                    .setParameter("user", user)
+                    .setParameter("track", track)
+                    .getResultList();
+
+            Rating rating = ratings.isEmpty() ? null : ratings.get(0);
+
+            if (rating == null) {
+                em.getTransaction().rollback();
+                message = context.createObjectMessage("Rating not found for user ID '" + userId + "' and track ID '" + trackId + "'.");
+                message.setIntProperty("status", 404);
+                return message;
+            }
+            em.createQuery("DELETE FROM Rating WHERE track_id = :trackId AND user_id = :userId")
+                .setParameter("trackId", trackId)
+                .setParameter("userId", userId)
+                .executeUpdate();
 
 
+
+
+            em.getTransaction().commit();
+
+            message = context.createObjectMessage("Successfully deleted.");
+            message.setIntProperty("status", 200);
+
+        } catch (RollbackException e) {
+            em.getTransaction().rollback();
+            return rollbackHandler(e, context);
+        } catch (NumberFormatException e) {
+            message = context.createObjectMessage("Invalid user ID or track ID.");
+            message.setIntProperty("status", 400);
+        } finally {
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+        }
+        
+
+        return message;
+    }
+    
+    public static ObjectMessage operation23(Message msg, JMSContext context) throws JMSException {
+        Serializable payload = ((ObjectMessage) msg).getObject();
+        System.out.println("Executing Operation 23 with payload: " + payload);
+        ObjectMessage message = null;
+        List<Package> packages = null;
+        
+        try{    
+            
+            em.getTransaction().begin();
+            packages = em.createQuery("SELECT t FROM Package t", Package.class).getResultList();
+            
+            
+            
+            for(Package pack : packages){
+                pack.setSubscriptionList(null);
+            }
+            message = context.createObjectMessage((Serializable) packages);
+            message.setIntProperty("status", 200);
+            }catch (RollbackException e) {
+                em.getTransaction().rollback();
+                return rollbackHandler(e, context);
+
+            }
+            finally{
+                if(em.getTransaction().isActive()) em.getTransaction().rollback();
+               
+            }
+        return message;
+    }
+    
+    public static ObjectMessage operation24(Message msg, JMSContext context) throws JMSException {
+        Serializable payload = ((ObjectMessage) msg).getObject();
+        System.out.println("Executing Operation 24 with payload: " + payload);
+        ObjectMessage message = null;
+        List<Subscription> subs = null;
+        
+        try{    
+            int userId = Integer.parseInt(msg.getStringProperty("user_id"));
+            em.getTransaction().begin();
+            User user = em.find(User.class, userId);
+            if (user == null) {
+                em.getTransaction().rollback();
+                message = context.createObjectMessage("User with ID '" + userId + "' not found.");
+                message.setIntProperty("status", 404);
+                return message;
+            }
+            
+            subs = user.getSubscriptionList();
+            
+            em.getTransaction().commit();
+            List<List<Subscription>> copy = new ArrayList<>();
+            List<City> cities = new ArrayList<>();
+
+            for(Subscription sub : subs){
+                
+                copy.add(sub.getUserId().getSubscriptionList());
+                cities.add(sub.getUserId().getCityId());
+                
+                sub.getPackageId().setSubscriptionList(null);
+                
+//                sub.setUserId(null);
+                sub.getUserId().setSubscriptionList(null);
+                sub.getUserId().setAudiotrackList(null);
+                sub.getUserId().setFavoritesList(null);
+                sub.getUserId().setCityId(null);
+                sub.getUserId().setRatingList(null);
+                sub.getUserId().setListeningList(null);
+                
+            }
+            message = context.createObjectMessage((Serializable) subs);
+            message.setIntProperty("status", 200);
+            int i = 0;
+            for(Subscription sub : subs){
+                sub.getUserId().setCityId(cities.get(i));
+                sub.getUserId().setSubscriptionList(copy.get(i));
+                i++;
+            }
+            }catch (RollbackException e) {
+                em.getTransaction().rollback();
+                return rollbackHandler(e, context);
+
+            }
+            finally{
+                if(em.getTransaction().isActive()) em.getTransaction().rollback();
+               
+            }
+        return message;
+    }
+    
+    
+    public static ObjectMessage operation25(Message msg, JMSContext context) throws JMSException {
+        Serializable payload = ((ObjectMessage) msg).getObject();
+        System.out.println("Executing Operation 25 with payload: " + payload);
+        ObjectMessage message = null;
+        List<Listening> listenings = null;
+        
+        try{    
+            int trackId = Integer.parseInt(msg.getStringProperty("track_id"));
+            em.getTransaction().begin();
+            Audiotrack track = em.find(Audiotrack.class, trackId);
+            if (track == null) {
+                em.getTransaction().rollback();
+                message = context.createObjectMessage("Track with ID '" + trackId + "' not found.");
+                message.setIntProperty("status", 404);
+                return message;
+            }
+            
+            listenings = track.getListeningList();
+            
+            em.getTransaction().commit();
+            List<List<Listening>> copy = new ArrayList<>();
+            List<City> cities = new ArrayList<>();
+
+            for(Listening listen : listenings){
+                
+                copy.add(listen.getUserId().getListeningList());
+                cities.add(listen.getUserId().getCityId());
+                
+                listen.getAudioId().setListeningList(null);
+                listen.getAudioId().setFavoritesList(null);
+                listen.getAudioId().setRatingList(null);
+                listen.getAudioId().setOwnerId(null);
+                listen.getUserId().setSubscriptionList(null);
+                listen.getUserId().setAudiotrackList(null);
+                listen.getUserId().setFavoritesList(null);
+                listen.getUserId().setCityId(null);
+                listen.getUserId().setRatingList(null);
+                listen.getUserId().setListeningList(null);
+                
+            }
+            message = context.createObjectMessage((Serializable) listenings);
+            message.setIntProperty("status", 200);
+            int i = 0;
+            for(Listening listen : listenings){
+                listen.getUserId().setCityId(cities.get(i));
+                listen.getUserId().setListeningList(copy.get(i));
+                i++;
+            }
+            }catch (RollbackException e) {
+                em.getTransaction().rollback();
+                return rollbackHandler(e, context);
+
+            }
+            finally{
+                if(em.getTransaction().isActive()) em.getTransaction().rollback();
+               
+            }
+        return message;
+    }
     
     public static Operation getOperation(String operation) {
         return operationTable.get(operation);
